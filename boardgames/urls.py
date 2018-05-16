@@ -17,9 +17,15 @@ Including another URLconf
 from django.urls import include, path
 from django.conf.urls import url
 from django.contrib import admin
+from django.contrib.auth.views import login, logout
 admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls, name='admin'),
     path(r'', include('main.urls')),
+]
+
+urlpatterns += [
+    url(r'^login/$', login, {'template_name': 'login.html'}, name='boardgames_login'),
+    url(r'^logout/$', logout, {'next_page': 'boardgames_home'}, name='boardgames_logout'),
 ]
