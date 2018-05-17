@@ -14,20 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 
-from django.urls import include, path
 from django.conf.urls import url
-from django.contrib import admin
-from django.contrib.auth.views import login, logout
-admin.autodiscover()
+from . import views
 
+app_name = 'tictactoe'
 urlpatterns = [
-    url(r'^admin/', admin.site.urls, name='admin'),
-    url(r'^user/', include('user.urls')),
-    url(r'^tictactoe/', include('tictactoe.urls')),
-    url(r'', include('main.urls')),
-]
-
-urlpatterns += [
-    url(r'^login/$', login, {'template_name': 'login.html'}, name='login'),
-    url(r'^logout/$', logout, {'next_page': 'main:boardgames_home'}, name='logout'),
+    url(r'^invite$', views.new_invitation, name='tictactoe_invite'),
 ]

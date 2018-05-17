@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 # Create your models here.
 GAME_STATUS_CHOICES=(
@@ -10,6 +11,14 @@ GAME_STATUS_CHOICES=(
 )
 
 
+class GamesManager(models.Manager):
+    def games_for_user(self, user):
+        """Return a queryset of games that this user participates in"""
+        return super(GamesManager, self).get_queryset().filter(
+            Q(first_player_id=user.id) | Q(second_player_id=user.id)
+        )
+
+
 class Game(models.Model):
     first_player = models.ForeignKey(User, related_name="games_first_player", on_delete=models.CASCADE)
     second_player = models.ForeignKey(User, related_name="games_second_player", on_delete=models.CASCADE)
@@ -18,7 +27,7 @@ class Game(models.Model):
     last_active = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=1, default="A",
                               choices=GAME_STATUS_CHOICES)
-
+    objects = GamesManager()
     def __str__(self):
         return "{0} vs {1}".format(self.first_player, self.second_player)
 
@@ -28,3 +37,15 @@ class Move(models.Model):
     y = models.IntegerField()
     comment = models.CharField(max_length=300)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+
+
+class Invitation(models.Model):
+    from_user = models.ForeignKey(User, related_name="invitations_sent", on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name="invitations_received",
+                                verbose_name="User to invite",
+                                help_text="Please select the user you want to play a game with",
+                                on_delete=models.CASCADE)
+    message = models.CharField("Optional Message", max_length=300, blank=True,
+                               help_text="Adding a friendly message is never a bad idea!")
+    timestamp = models.DateTimeField(auto_now_add=True)
+
